@@ -38,11 +38,35 @@ def get_online_data():
     for j in range(1, 49):
         # url = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=6yzf&st=desc&sd=2020-09-24&ed=2021-09-24&qdii=&tabSubtype=,,,,,&pi={j}&pn=50&dx=1&v=0.9687047682263124'
         r = requests.get(url="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=6yzf&st=desc&sd=2020-09-24&ed=2021-09-24&qdii=&tabSubtype=,,,,,&pi={}&pn=50&dx=1&v=0.9687047682263124".format(j), headers=header)
-        funds = r.text[23:].split(",")
+        funds = r.text[23:]
+        funds = funds[:funds.index(']')+1]
+
+        str_ = funds.split(",")
         list1 = []
         for n in range(50):
-            list1.append(funds[n*23 : (n+1)*23])
-        print(list1)
+            list1.append(str_[n*25 : (n+1)*25])
+        num = []
+        name = []
+        today_price = []
+        today_increase_rate = []
+        for i in range(len(list1)):
+            num.append(list1[i][FUND_CODE][1:])
+            name.append(list1[i][FUND_NAME])
+            today_price.append(list1[i][FUND_danweijingzhi])
+            today_increase_rate.append(list1[i][FUND_DAY_INCREASE])
+        df = pd.DataFrame()
+        df['基金代码'] = num
+        df['基金名称'] = name
+        df['单位净值'] = today_price
+        df['日增长率'] = today_increase_rate
+        try:
+            df.to_excel(f'基金{j}.xlsx', '基金信息', index=None, encoding='utf-8')
+
+        except Exception as e:
+            print(e)
+
+
+
 # def get_jingzhi():
 #     headers = {
 #         "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36',
@@ -112,6 +136,7 @@ def get_online_data():
 
 if __name__ == '__main__':
     get_online_data()
+    # print(len(", 'allRecords:8966', 'pageIndex:2', 'pageNum:50', 'allPages:180', 'allNum:8966', 'gpNum:1784', 'hhNum:4880', 'zqNum:2107', 'zsNum:1301', 'bbNum:0', 'qdiiNum:195', 'etfNum:0', 'lofNum:336', 'fofNum:193};']"))
     # print(len('],allRecords:8966,pageIndex:1,pageNum:50,allPages:180,allNum:8966,gpNum:1784,hhNum:4880,zqNum:2107,zsNum:1301,bbNum:0,qdiiNum:195,etfNum:0,lofNum:336,fofNum:193};'))
     #     code = dd[0]
     #     # fcode, fname, fgz, fzzl = get_jingzhi(code)
