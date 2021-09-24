@@ -38,8 +38,10 @@ def get_online_data():
     for j in range(1, 49):
         # url = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=6yzf&st=desc&sd=2020-09-24&ed=2021-09-24&qdii=&tabSubtype=,,,,,&pi={j}&pn=50&dx=1&v=0.9687047682263124'
         r = requests.get(url="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=6yzf&st=desc&sd=2020-09-24&ed=2021-09-24&qdii=&tabSubtype=,,,,,&pi={}&pn=50&dx=1&v=0.9687047682263124".format(j), headers=header)
-        funds = r.text[23:]
+
+        funds = r.text[r.text.find('[')+1:]
         funds = funds[:funds.index(']')+1]
+        # [(.*?)\]
 
         str_ = funds.split(",")
         list1 = []
@@ -60,7 +62,8 @@ def get_online_data():
         df['单位净值'] = today_price
         df['日增长率'] = today_increase_rate
         try:
-            df.to_excel(f'基金{j}.xlsx', '基金信息', index=None, encoding='utf-8')
+            print("generating fund list {}".format(j))
+            df.to_excel(f'fundlist_{j}.xlsx', 'fund_info', index=None, encoding='utf-8')
 
         except Exception as e:
             print(e)
