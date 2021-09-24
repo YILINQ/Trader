@@ -8,6 +8,21 @@ from lxml import etree
 import lxml.html as LH
 from bs4 import BeautifulSoup
 
+FUND_CODE = 0
+FUND_NAME = 1
+FUND_danweijingzhi = 4
+FUND_leijijingzhi = 5
+FUND_DAY_INCREASE = 6
+FUND_WEEK_INCREASE = 7
+FUND_MONTH_INCREASE = 8
+FUND_QUATER_INCREASE = 9
+FUND_HALF_YEAR_INCREASE = 10
+FUND_ONE_YEAR_INCREASE = 11
+FUND_TWO_YEAR_INCREASE = 12
+FUND_THREE_YEAR_INCREASE = 13
+FUND_THIS_YEAR_INCREASE = 14
+FUND_INCREASE_SINCE_FOUND = 15
+
 def read_csv(path='code.csv'):
     data = np.loadtxt(path, dtype=str, delimiter=',', encoding='utf-8')
     return data
@@ -18,10 +33,16 @@ def text(elt):
 def get_online_data():
     header = {
     "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36',
+    "Referer": "http://fund.eastmoney.com/data/fundranking.html",
     }
-
-    r = requests.get(url="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=6yzf&st=desc&sd=2020-09-24&ed=2021-09-24&qdii=&tabSubtype=,,,,,&pi=3&pn=50&dx=1&v=0.9687047682263124", headers=header)
-    print(r.text)
+    for j in range(1, 49):
+        # url = f'http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=6yzf&st=desc&sd=2020-09-24&ed=2021-09-24&qdii=&tabSubtype=,,,,,&pi={j}&pn=50&dx=1&v=0.9687047682263124'
+        r = requests.get(url="http://fund.eastmoney.com/data/rankhandler.aspx?op=ph&dt=kf&ft=all&rs=&gs=0&sc=6yzf&st=desc&sd=2020-09-24&ed=2021-09-24&qdii=&tabSubtype=,,,,,&pi={}&pn=50&dx=1&v=0.9687047682263124".format(j), headers=header)
+        funds = r.text[23:].split(",")
+        list1 = []
+        for n in range(50):
+            list1.append(funds[n*23 : (n+1)*23])
+        print(list1)
 # def get_jingzhi():
 #     headers = {
 #         "User-Agent": 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36',
@@ -91,9 +112,7 @@ def get_online_data():
 
 if __name__ == '__main__':
     get_online_data()
-    # data = read_csv()
-    # # http://fund.eastmoney.com/pingzhongdata/%160216.js
-    # for dd in data:
+    # print(len('],allRecords:8966,pageIndex:1,pageNum:50,allPages:180,allNum:8966,gpNum:1784,hhNum:4880,zqNum:2107,zsNum:1301,bbNum:0,qdiiNum:195,etfNum:0,lofNum:336,fofNum:193};'))
     #     code = dd[0]
     #     # fcode, fname, fgz, fzzl = get_jingzhi(code)
     #     # print(fcode, fname, fgz, fzzl)
