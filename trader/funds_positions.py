@@ -51,10 +51,11 @@ def find_all(a_str, sub):
 
 
 
-def main():
+def main(MAX_LEN=50, codes=[]):
     funds = []
     fund_ids = []
     fundNum = 0
+    name_map = {}
     send = request.Request(url="http://fund.eastmoney.com/js/fundcode_search.js", headers=head)
     response = request.urlopen(send)
     js = response.read().decode('utf-8')
@@ -64,23 +65,26 @@ def main():
         fund = fund.split(',')
         fund_ids.append(fund[0])
         funds.append(fund)
+        name_map[fund[0]] = fund[2]
     fund_counter = 0
-
-    while fundNum < len(fund_ids) and fund_counter < 30:
-        fund_id = funds[fundNum][0]
+    if codes == []:
+        codes = fund_ids
+    for code in codes:
+    # while fundNum < len(fund_ids) and fund_counter < MAX_LEN:
+    #     fund_id = funds[fundNum][0]
+        if fund_counter > MAX_LEN:
+            return
         try:
+
             stock_codes = []
             stock_names = []
             price_value_percent = []
             stock_position_num = []
             stock_position_value = []
 
-
-
-
-            url = "http://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code=" + str(fund_id) + "&topline=10&year=2021&month=&rt=0.21822537857648627"
+            url = "http://fundf10.eastmoney.com/FundArchivesDatas.aspx?type=jjcc&code=" + str(code) + "&topline=10&year=2021&month=&rt=0.21822537857648627"
             send = request.Request(url,headers = head)
-            response = request.urlopen(send, timeout=10)
+            response = request.urlopen(send, timeout=1)
             html = response.read().decode('utf-8')
             bs =BeautifulSoup(html,"html.parser")
 
@@ -115,12 +119,11 @@ def main():
                 df['持仓市值'] = stock_position_value
 
 
-                df.to_excel(f'{fund_id}_{funds[fundNum][2]}.xlsx', 'stock_position_info', index=None, encoding='utf-8')
+                df.to_excel(f'{code}_{name_map[code]}.xlsx', 'stock_position_info', index=None, encoding='utf-8')
                 fund_counter += 1
 
         except:
-            print(fund_id + " 获取失败")
-        fundNum += 1
+            print(code + " 获取失败")
 
 
 if __name__ == "__main__":
